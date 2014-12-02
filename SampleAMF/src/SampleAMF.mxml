@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Application xmlns:fx="http://ns.adobe.com/mxml/2009"
+			   xmlns:s="library://ns.adobe.com/flex/spark"
+			   xmlns:mx="library://ns.adobe.com/flex/mx"
+			   creationComplete="onCreationComplete()"
+			   viewSourceURL="https://github.com/codeenjin/samples-flex/SampleAMF/src">
+	
+	<fx:Script>
+		<![CDATA[
+			private const INDEX_PHP:String = "http://unittest.sketchpage.jp/amfphp/index.php";
+			
+			private var _connection:NetConnection;
+			private var _responder:Responder;
+			
+			private function onCreationComplete():void {
+				_connection = new NetConnection();
+				_connection.objectEncoding = ObjectEncoding.AMF3;
+				_connection.connect(INDEX_PHP + "?time=" + new Date().getTime());
+				
+				_responder = new Responder(onResult, onFault)
+			}
+			
+			private function onResult(result:*):void {
+				resultText.text += result + "\n\n";
+			}
+			
+			private function onFault(result:*):void {
+				resultText.text += "fault\n\n";
+			}
+			
+			private function onTest1ButtonClick():void {
+				var stringParam:String = "test string";
+				var numberParam:Number = 3.14;
+				var arrayParam:Array = ["element1", "element2", "element3"];
+				_connection.call("SamplePHP.test1", _responder, 
+					stringParam, numberParam, arrayParam);
+			}
+			
+			private function onTest2ButtonClick():void {
+				var xmlParam:XML = new XML(<root/>);
+				xmlParam.appendChild(<title/>);
+				xmlParam.appendChild(<version/>);
+				xmlParam.appendChild(<description/>);
+				xmlParam.title[0] = "TITLE STRING";
+				xmlParam.version[0] = "1.0.0";
+				xmlParam.description[0] = "description string.";
+				_connection.call("SamplePHP.test2", _responder, xmlParam);
+			}
+		]]>
+	</fx:Script>
+	
+	<s:VGroup width="100%" height="100%" left="10" top="10" right="10" bottom="10">
+		<s:HGroup width="100%" verticalAlign="middle" gap="10">
+			<s:Button id="test1Button" label="test1" click="onTest1ButtonClick()"/>
+			<s:Label text="'String', 'Number', 'Array'"/>
+		</s:HGroup>
+		<s:HGroup width="100%" verticalAlign="middle" gap="10">
+			<s:Button id="test2Button" label="test2" click="onTest2ButtonClick()"/>
+			<s:Label text="'XML'"/>
+		</s:HGroup>
+		<s:TextArea id="resultText" width="100%" height="100%"/>
+	</s:VGroup>
+</s:Application>
